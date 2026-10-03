@@ -1,10 +1,11 @@
 import type {
   FormationType,
   Hemisphere,
+  SimulationParameters,
   VerticalMotion,
 } from './types'
 
-export type CirculationCellName = 'hadley' | 'ferrel' | 'polar'
+export type CirculationCellName = 'hadley' | 'ferrel' | 'polar' | 'single'
 
 export type CirculationPathPoint = Readonly<{
   latitude: number
@@ -83,6 +84,25 @@ const CELL_DEFINITIONS: readonly CellDefinition[] = [
   },
 ]
 
+const SINGLE_CELL_DEFINITIONS: readonly CellDefinition[] = [
+  {
+    name: 'single',
+    hemisphere: 'southern',
+    formation: 'thermal',
+    equatorwardLatitude: 0,
+    polewardLatitude: -90,
+    surfaceTowardPole: false,
+  },
+  {
+    name: 'single',
+    hemisphere: 'northern',
+    formation: 'thermal',
+    equatorwardLatitude: 0,
+    polewardLatitude: 90,
+    surfaceTowardPole: false,
+  },
+]
+
 const VERTICAL_MOTIONS: readonly VerticalMotionMarker[] = [
   { latitude: -90, motion: 'sinking' },
   { latitude: -60, motion: 'rising' },
@@ -111,8 +131,16 @@ function createPath(
   ]
 }
 
-export function getCirculationCells(): readonly CirculationCell[] {
-  return CELL_DEFINITIONS.map((definition) => ({
+export function getCirculationCells(
+  { coriolisEnabled }: Pick<SimulationParameters, 'coriolisEnabled'> = {
+    coriolisEnabled: true,
+  },
+): readonly CirculationCell[] {
+  const definitions = coriolisEnabled
+    ? CELL_DEFINITIONS
+    : SINGLE_CELL_DEFINITIONS
+
+  return definitions.map((definition) => ({
     name: definition.name,
     hemisphere: definition.hemisphere,
     formation: definition.formation,

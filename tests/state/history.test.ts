@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   createHistory,
+  HISTORY_LIMIT,
   pushHistory,
   redoHistory,
   undoHistory,
@@ -43,6 +44,18 @@ describe('history', () => {
     })
 
     expect(replaced.future).toEqual([])
+  })
+
+  it('keeps only the latest classroom history records', () => {
+    let history = createHistory<number>()
+
+    for (let value = 0; value <= HISTORY_LIMIT; value += 1) {
+      history = pushHistory(history, value)
+    }
+
+    expect(history.past).toHaveLength(HISTORY_LIMIT)
+    expect(history.past[0]).toBe(1)
+    expect(history.past.at(-1)).toBe(HISTORY_LIMIT)
   })
 
   it('keeps the current value at history boundaries', () => {

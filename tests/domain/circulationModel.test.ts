@@ -5,6 +5,28 @@ import {
 } from '../../src/domain/atmosphere/circulationModel'
 
 describe('getCirculationCells', () => {
+  it('returns one thermal equator-to-pole cell per hemisphere without Coriolis', () => {
+    expect(getCirculationCells({ coriolisEnabled: false })).toEqual(
+      [-90, 90].map((pole) => ({
+        name: 'single',
+        hemisphere: pole < 0 ? 'southern' : 'northern',
+        formation: 'thermal',
+        path: [
+          { latitude: pole, normalizedAltitude: 0 },
+          { latitude: 0, normalizedAltitude: 0 },
+          { latitude: 0, normalizedAltitude: 1 },
+          { latitude: pole, normalizedAltitude: 1 },
+        ],
+      })),
+    )
+  })
+
+  it('preserves the default model when Coriolis is enabled', () => {
+    expect(getCirculationCells({ coriolisEnabled: true })).toEqual(
+      getCirculationCells(),
+    )
+  })
+
   it('returns Hadley, Ferrel, and Polar cells in both hemispheres', () => {
     const cells = getCirculationCells()
 

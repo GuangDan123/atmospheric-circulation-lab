@@ -1,3 +1,4 @@
+import type { CirculationCell } from '../../domain/atmosphere/circulationModel'
 import type { AtmosphereSnapshot } from '../../domain/atmosphere/deriveAtmosphere'
 import type { FormationType, VerticalMotion } from '../../domain/atmosphere/types'
 
@@ -26,8 +27,16 @@ export type SectionWindBelt = Readonly<{
   }>
 }>
 
+export type SectionCirculationCell = Readonly<
+  Omit<CirculationCell, 'path'> & {
+    sourceId: string
+    coordinates: readonly SectionCoordinates[]
+  }
+>
+
 export type SectionProjection = Readonly<{
   source: AtmosphereSnapshot
+  circulationCells: readonly SectionCirculationCell[]
   pressureBelts: readonly SectionPressureBelt[]
   windBelts: readonly SectionWindBelt[]
 }>
@@ -66,6 +75,16 @@ export function projectSection(
 ): SectionProjection {
   return {
     source: snapshot,
+    circulationCells: snapshot.circulationCells.map((cell) => ({
+      sourceId: `circulation-cell:${cell.name}-${cell.hemisphere}`,
+      name: cell.name,
+      hemisphere: cell.hemisphere,
+      formation: cell.formation,
+      coordinates: cell.path.map((point) => ({
+        x: sectionX(point.latitude),
+        y: 280 - point.normalizedAltitude * 220,
+      })),
+    })),
     pressureBelts: snapshot.pressureBelts.map((belt, index) => ({
       sourceId: pressureBeltIds[index],
       formation: belt.formation,

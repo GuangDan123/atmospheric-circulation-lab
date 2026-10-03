@@ -41,21 +41,28 @@ export function LabelLayer({
 }: LabelLayerProps) {
   return (
     <group scale={transform.scale} name="globe-layer-labels">
-      {pressureBelts
-        .filter((belt) =>
-          shouldRenderLabel(belt.sourceId, density, selectedPressureBeltId),
-        )
-        .map((belt) => (
-          <Html
-            key={belt.sourceId}
-            position={[belt.coordinates.radius + 0.06, belt.coordinates.height, 0]}
-            center
+      {pressureBelts.map((belt) => (
+        <Html
+          key={belt.sourceId}
+          position={[belt.coordinates.radius + 0.06, belt.coordinates.height, 0]}
+          center
+        >
+          <span
+            data-source-id={`label:${belt.sourceId}`}
+            style={{
+              visibility: shouldRenderLabel(
+                belt.sourceId,
+                density,
+                selectedPressureBeltId,
+              )
+                ? 'visible'
+                : 'hidden',
+            }}
           >
-            <span data-source-id={`label:${belt.sourceId}`}>
-              {labelFor(belt.sourceId)}
-            </span>
-          </Html>
-        ))}
+            {labelFor(belt.sourceId)}
+          </span>
+        </Html>
+      ))}
     </group>
   )
 }

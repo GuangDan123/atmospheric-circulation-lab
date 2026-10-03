@@ -32,7 +32,7 @@ export function deriveAtmosphere(
   return {
     parameters: { ...parameters },
     solarDeclination: getSolarDeclination(parameters.month),
-    circulationCells: getCirculationCells(),
+    circulationCells: getCirculationCells(parameters),
     pressureBelts,
     windBelts: getWindBelts({
       pressureBelts,

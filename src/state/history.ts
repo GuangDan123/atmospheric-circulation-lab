@@ -8,6 +8,8 @@ export type HistoryTransition<T> = Readonly<{
   value: T
 }>
 
+export const HISTORY_LIMIT = 20
+
 export function createHistory<T>(): History<T> {
   return { past: [], future: [] }
 }
@@ -17,7 +19,7 @@ export function pushHistory<T>(
   value: T,
 ): History<T> {
   return {
-    past: [...history.past, value],
+    past: [...history.past, value].slice(-HISTORY_LIMIT),
     future: [],
   }
 }

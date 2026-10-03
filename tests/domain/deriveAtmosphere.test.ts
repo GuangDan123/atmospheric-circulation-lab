@@ -20,6 +20,29 @@ function createParameters(
 }
 
 describe('deriveAtmosphere', () => {
+  it('switches from six cells to two single cells and back with Coriolis', () => {
+    const enabled = deriveAtmosphere(createParameters())
+    const disabled = deriveAtmosphere(createParameters({ coriolisEnabled: false }))
+
+    expect(disabled.circulationCells).toHaveLength(2)
+    expect(disabled.circulationCells.map((cell) => cell.name)).toEqual([
+      'single',
+      'single',
+    ])
+    expect(enabled.circulationCells).toHaveLength(6)
+    expect(deriveAtmosphere(createParameters())).toEqual(enabled)
+  })
+
+  it('does not share single-cell path points across snapshots', () => {
+    const parameters = createParameters({ coriolisEnabled: false })
+    const first = deriveAtmosphere(parameters)
+    const expected = deriveAtmosphere(parameters)
+
+    ;(first.circulationCells[0].path as Array<{ latitude: number }>)[0].latitude = 0
+
+    expect(deriveAtmosphere(parameters)).toEqual(expected)
+  })
+
   it('derives one complete atmosphere snapshot', () => {
     const parameters = createParameters()
     const snapshot = deriveAtmosphere(parameters)

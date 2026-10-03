@@ -18,6 +18,13 @@ const latitudeLabels = [
   { latitude: 90, label: '北极地' },
 ] as const
 
+const cellNames = {
+  single: '单圈环流',
+  hadley: '哈德莱环流',
+  ferrel: '费雷尔环流',
+  polar: '极地环流',
+} as const
+
 function xForLatitude(latitude: number): number {
   return 40 + ((latitude + 90) / 180) * 720
 }
@@ -79,6 +86,17 @@ export function MeridionalSection({
           </g>
         )
       })}
+      {projection.circulationCells.map((cell) => (
+        <path
+          key={cell.sourceId}
+          data-source-id={cell.sourceId}
+          aria-label={`${cell.hemisphere === 'southern' ? '南半球' : '北半球'}${cellNames[cell.name]}`}
+          d={`${cell.coordinates.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`).join(' ')} Z`}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={3}
+        />
+      ))}
       {projection.windBelts.map((belt) => (
         <line
           key={belt.sourceId}

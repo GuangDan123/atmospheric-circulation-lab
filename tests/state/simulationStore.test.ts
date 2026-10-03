@@ -127,6 +127,21 @@ describe('simulation store', () => {
     )
   })
 
+  it('keeps the latest classroom changes available for undo and redo', () => {
+    for (let change = 1; change <= 25; change += 1) {
+      useSimulationStore.getState().setTeachingStep(change)
+    }
+
+    const state = useSimulationStore.getState()
+    expect(state.history.past.at(-1)?.teachingStep).toBe(24)
+    expect(state.history.past.length).toBeLessThanOrEqual(20)
+
+    state.undo()
+    expect(useSimulationStore.getState().teachingStep).toBe(24)
+    state.redo()
+    expect(useSimulationStore.getState().teachingStep).toBe(25)
+  })
+
   it('restores the initial preset on reset', () => {
     useSimulationStore.getState().setMonth(1)
     useSimulationStore.getState().setFrictionStrength(0.6)
