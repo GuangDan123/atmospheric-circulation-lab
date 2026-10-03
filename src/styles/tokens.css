@@ -1,0 +1,17 @@
+:root {
+  --color-ink: #17324d;
+  --color-heading: #16324f;
+  --color-muted: #557080;
+  --color-accent: #26738d;
+  --color-accent-soft: #dff1f5;
+  --color-panel: #ffffff;
+  --color-canvas: #eef5f8;
+  --color-border: #c8dbe3;
+  --color-rising: #22d3ee;
+  --color-sinking: #fbbf24;
+  --color-selection: #fde047;
+  --radius-panel: 1rem;
+  --radius-control: 0.6rem;
+  --shadow-panel: 0 8px 24px rgb(30 75 96 / 8%);
+  --touch-target: 44px;
+}

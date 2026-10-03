@@ -41,6 +41,53 @@ describe('simulation store', () => {
     expect(secondSnapshot).toBe(firstSnapshot)
   })
 
+  it('changes performance tier without resetting classroom state', () => {
+    useSimulationStore.getState().setMonth(7)
+    useSimulationStore
+      .getState()
+      .selectPressureBelt('pressure-belt:subtropical-north')
+    useSimulationStore.getState().setTeachingStep(4)
+    const firstSnapshot = selectAtmosphereSnapshot(
+      useSimulationStore.getState(),
+    )
+
+    useSimulationStore.getState().setPerformanceTier('low')
+
+    const state = useSimulationStore.getState()
+    expect(state.performanceTier).toBe('low')
+    expect(state.month).toBe(7)
+    expect(state.selectedPressureBeltId).toBe(
+      'pressure-belt:subtropical-north',
+    )
+    expect(state.teachingStep).toBe(4)
+    expect(selectAtmosphereSnapshot(state)).toBe(firstSnapshot)
+  })
+
+  it('shares causal playback state without adding it to teaching history', () => {
+    useSimulationStore.getState().setMonth(7)
+    useSimulationStore.getState().setPlayback('playing')
+    useSimulationStore.getState().setPlaybackSpeed(2)
+    useSimulationStore.getState().nextTeachingStep()
+
+    let state = useSimulationStore.getState()
+    expect(state.playback).toBe('paused')
+    expect(state.playbackSpeed).toBe(2)
+    expect(state.teachingStep).toBe(1)
+
+    state.setPlayback('playing')
+    state.undo()
+    state = useSimulationStore.getState()
+    expect(state.month).toBe(7)
+    expect(state.teachingStep).toBe(0)
+    expect(state.playback).toBe('playing')
+    expect(state.playbackSpeed).toBe(2)
+
+    state.undo()
+    expect(useSimulationStore.getState().month).toBe(
+      initialSimulationState.month,
+    )
+  })
+
   it('projects every view from the same snapshot reference', () => {
     const state = useSimulationStore.getState()
     const snapshot = selectAtmosphereSnapshot(state)

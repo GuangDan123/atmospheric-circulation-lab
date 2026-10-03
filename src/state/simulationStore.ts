@@ -3,11 +3,22 @@ import {
   deriveAtmosphere,
   type AtmosphereSnapshot,
 } from '../domain/atmosphere/deriveAtmosphere'
+import {
+  nextStep,
+  previousStep,
+  setPlaybackSpeed as updatePlaybackSpeed,
+} from '../domain/causality/causalPlayback'
+import type {
+  CausalPlaybackState,
+  PlaybackStatus,
+} from '../domain/causality/types'
+import { subtropicalHighScenario } from '../scenarios/p0/subtropicalHigh'
 import type {
   Month,
   RotationDirection,
   SimulationParameters,
 } from '../domain/atmosphere/types'
+import type { PerformanceSelection } from '../rendering/performance/profile'
 import {
   createHistory,
   pushHistory,
@@ -44,6 +55,9 @@ export const initialSimulationState = {
   teachingStep: 0,
   explodedViewProgress: 0,
   visibleLayers: defaultVisibleLayers,
+  performanceTier: 'auto' as PerformanceSelection,
+  playback: 'paused' as PlaybackStatus,
+  playbackSpeed: 1,
 } as const
 
 type SimulationValues = {
@@ -58,6 +72,9 @@ type SimulationValues = {
   teachingStep: number
   explodedViewProgress: number
   visibleLayers: VisibleLayers
+  performanceTier: PerformanceSelection
+  playback: PlaybackStatus
+  playbackSpeed: number
   history: History<TeachingState>
 }
 
@@ -69,6 +86,12 @@ type SimulationActions = {
   selectPressureBelt: (id: string | null) => void
   setExplodedViewProgress: (progress: number) => void
   setVisibleLayer: (layer: VisibleLayer, visible: boolean) => void
+  setPerformanceTier: (tier: PerformanceSelection) => void
+  setPlayback: (playback: PlaybackStatus) => void
+  setPlaybackSpeed: (speed: number) => void
+  nextTeachingStep: () => void
+  previousTeachingStep: () => void
+  setTeachingStep: (step: number) => void
   applyPreset: (preset: SimulationPreset) => void
   undo: () => void
   redo: () => void
@@ -143,6 +166,15 @@ function recordChange(
   }
 }
 
+function toPlaybackState(state: SimulationValues): CausalPlaybackState {
+  return {
+    scenarioId: subtropicalHighScenario.id,
+    stepIndex: state.teachingStep,
+    playback: state.playback,
+    speed: state.playbackSpeed,
+  }
+}
+
 export const useSimulationStore = create<SimulationStoreState>((set) => ({
   ...initialSimulationState,
   history: createHistory<TeachingState>(),
@@ -177,6 +209,45 @@ export const useSimulationStore = create<SimulationStoreState>((set) => ({
     set((state) => ({
       visibleLayers: { ...state.visibleLayers, [layer]: visible },
     }))
+  },
+  setPerformanceTier: (performanceTier) => {
+    set({ performanceTier })
+  },
+  setPlayback: (playback) => {
+    set({ playback })
+  },
+  setPlaybackSpeed: (playbackSpeed) => {
+    set((state) => ({
+      playbackSpeed: updatePlaybackSpeed(
+        toPlaybackState(state),
+        playbackSpeed,
+      ).speed,
+    }))
+  },
+  nextTeachingStep: () => {
+    set((state) => {
+      const next = nextStep(toPlaybackState(state), subtropicalHighScenario)
+      return {
+        ...recordChange(state, {
+          teachingStep: next.stepIndex,
+        }),
+        playback: next.playback,
+      }
+    })
+  },
+  previousTeachingStep: () => {
+    set((state) => {
+      const previous = previousStep(toPlaybackState(state))
+      return recordChange(state, {
+        teachingStep: previous.stepIndex,
+      })
+    })
+  },
+  setTeachingStep: (teachingStep) => {
+    if (!Number.isInteger(teachingStep) || teachingStep < 0) {
+      throw new RangeError('teachingStep must be a non-negative integer')
+    }
+    set((state) => recordChange(state, { teachingStep }))
   },
   applyPreset: (preset) => {
     assertMonth(preset.parameters.month)
