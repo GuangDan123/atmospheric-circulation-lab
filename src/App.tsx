@@ -1,3 +1,5 @@
+import { ClimatePanel } from './features/climate/ClimatePanel'
+import { StudentLearningPanel } from './features/student/StudentLearningPanel'
 import { MonsoonExplorer } from './features/monsoon/MonsoonExplorer'
 import { useMemo, useState } from 'react'
 import { ClassroomLayout } from './components/layout/ClassroomLayout'
@@ -165,6 +167,8 @@ function App() {
               onApplyPreset={state.applyPreset}
               onPause={() => state.setPlayback('paused')}
             />
+            <StudentLearningPanel snapshot={snapshot} onPause={() => state.setPlayback('paused')} />
+            <ClimatePanel snapshot={snapshot} />
             <MonsoonExplorer
               snapshot={snapshot}
               onApplyPreset={state.applyPreset}

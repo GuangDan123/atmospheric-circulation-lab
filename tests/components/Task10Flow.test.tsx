@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import App from '../../src/App'
 import { useSimulationStore } from '../../src/state/simulationStore'
@@ -45,10 +45,10 @@ describe('Stage 2 classroom flow', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '查看 7 月' }))
     expect(useSimulationStore.getState().month).toBe(7)
-    expect(screen.getByText('pressure-belt:subtropical-north')).toBeInTheDocument()
+    expect(within(screen.getByRole('region', { name: '地点追踪面板' })).getByText('pressure-belt:subtropical-north')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: '查看 1 月' }))
     expect(useSimulationStore.getState().month).toBe(1)
-    expect(screen.getByText('wind-belt:westerly-north')).toBeInTheDocument()
+    expect(within(screen.getByRole('region', { name: '地点追踪面板' })).getByText('wind-belt:westerly-north')).toBeInTheDocument()
   })
 })

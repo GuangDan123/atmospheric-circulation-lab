@@ -51,7 +51,7 @@ describe('课堂主流程', () => {
     expect(useSimulationStore.getState().selectedPressureBeltId).toBe(
       'pressure-belt:subtropical-north',
     )
-    expect(screen.getByText('动力成因')).toBeInTheDocument()
+    expect(screen.getByLabelText('当前选中气压带成因')).toHaveTextContent('动力成因')
   })
 
   it('plays all seven causal steps, supports pause and rewind, then resets', () => {

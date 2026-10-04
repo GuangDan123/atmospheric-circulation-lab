@@ -1,3 +1,4 @@
+import { completeStudentLearning } from './studentLearningFlow'
 import { expect, test } from '@playwright/test'
 
 test('keeps the core classroom available after an offline refresh', async ({
@@ -25,4 +26,12 @@ test('keeps the core classroom available after an offline refresh', async ({
   await expect(page.getByRole('combobox', { name: '自转方向' })).toHaveValue('-1')
   await page.getByRole('button', { name: '撤销', exact: true }).click()
   await expect(page.getByRole('combobox', { name: '自转方向' })).toHaveValue('1')
+})
+
+test('completes the student learning lifecycle offline', async ({ context, page }) => {
+  await page.goto('/')
+  await page.evaluate(async () => { await navigator.serviceWorker.ready })
+  await context.setOffline(true)
+  await page.reload()
+  await completeStudentLearning(page)
 })
