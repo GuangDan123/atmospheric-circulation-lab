@@ -3,6 +3,7 @@ import type {
   LabelDensity,
 } from '../../rendering/performance/profile'
 import type { VisibleLayers } from '../../state/types'
+import { LandSeaAnomalyLayer } from './layers/LandSeaAnomalyLayer'
 import { LabelLayer } from './layers/LabelLayer'
 import { LatitudeGridLayer } from './layers/LatitudeGridLayer'
 import { PressureBeltLayer } from './layers/PressureBeltLayer'
@@ -46,6 +47,12 @@ export function GlobeScene({
           selectedPressureBeltId={selectedPressureBeltId}
           transform={projection.layerTransforms.pressure}
           onSelectPressureBelt={onSelectPressureBelt}
+        />
+      )}
+      {visibleLayers.pressure && projection.landSeaAnomalies.length > 0 && (
+        <LandSeaAnomalyLayer
+          anomalies={projection.landSeaAnomalies}
+          transform={projection.layerTransforms.pressure}
         />
       )}
       {visibleLayers.wind && (

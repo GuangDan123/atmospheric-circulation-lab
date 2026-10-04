@@ -5,6 +5,11 @@ import {
   type VerticalMotionMarker,
 } from './circulationModel'
 import {
+  getLandSeaAnomalies,
+  type LandSeaAnomaly,
+  type LandSeaContrast,
+} from './landSeaModel'
+import {
   getPressureBelts,
   type PressureBelt,
 } from './pressureBeltModel'
@@ -19,6 +24,7 @@ export type AtmosphereSnapshot = Readonly<{
   pressureBelts: readonly PressureBelt[]
   windBelts: readonly WindBelt[]
   verticalMotions: readonly VerticalMotionMarker[]
+  landSeaAnomalies: readonly LandSeaAnomaly[]
 }>
 
 export function deriveAtmosphere(
@@ -27,6 +33,11 @@ export function deriveAtmosphere(
   const pressureBelts = getPressureBelts({
     month: parameters.month,
     seasonalShiftScale: parameters.seasonalShiftScale,
+  })
+  const landSeaContrast = parameters.landSeaContrast ?? 0
+  const landSeaAnomalies = getLandSeaAnomalies({
+    month: parameters.month,
+    landSeaContrast: landSeaContrast as LandSeaContrast,
   })
 
   return {
@@ -42,5 +53,6 @@ export function deriveAtmosphere(
       frictionStrength: parameters.frictionStrength,
     }),
     verticalMotions: getVerticalMotions(),
+    landSeaAnomalies,
   }
 }

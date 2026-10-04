@@ -24,6 +24,21 @@ export type GlobeWindBelt = Readonly<{
   }>
 }>
 
+export type GlobeLandSeaAnomaly = Readonly<{
+  sourceId: string
+  kind: 'high' | 'low'
+  latitude: number
+  longitude: number
+  anomalyStrength: number
+  name: string
+  source: string
+  coordinates: Readonly<{
+    x: number
+    y: number
+    z: number
+  }>
+}>
+
 export type GlobeLayerTransform = Readonly<{
   scale: number
 }>
@@ -32,6 +47,7 @@ export type GlobeProjection = Readonly<{
   source: AtmosphereSnapshot
   pressureBelts: readonly GlobePressureBelt[]
   windBelts: readonly GlobeWindBelt[]
+  landSeaAnomalies: readonly GlobeLandSeaAnomaly[]
   layerTransforms: Readonly<Record<VisibleLayer, GlobeLayerTransform>>
 }>
 
@@ -78,6 +94,21 @@ function adjacentWindBeltIds(index: number): readonly string[] {
   )
 }
 
+function sphericalPoint(
+  latitude: number,
+  longitude: number,
+  altitude: number,
+): GlobeLandSeaAnomaly['coordinates'] {
+  const latitudeRadians = (latitude * Math.PI) / 180
+  const longitudeRadians = (longitude * Math.PI) / 180
+  const radius = 1 + altitude
+  return {
+    x: Math.cos(latitudeRadians) * Math.sin(longitudeRadians) * radius,
+    y: Math.sin(latitudeRadians) * radius,
+    z: Math.cos(latitudeRadians) * Math.cos(longitudeRadians) * radius,
+  }
+}
+
 export function projectGlobe(
   snapshot: AtmosphereSnapshot,
   explodedViewProgress: number,
@@ -109,6 +140,16 @@ export function projectGlobe(
         coordinates: sphericalRing(centerLatitude, 0.08),
       }
     }),
+    landSeaAnomalies: snapshot.landSeaAnomalies.map((anomaly) => ({
+      sourceId: anomaly.id,
+      kind: anomaly.kind,
+      latitude: anomaly.latitude,
+      longitude: anomaly.longitude,
+      anomalyStrength: anomaly.anomalyStrength,
+      name: anomaly.name,
+      source: anomaly.source,
+      coordinates: sphericalPoint(anomaly.latitude, anomaly.longitude, 0.06),
+    })),
     layerTransforms: Object.fromEntries(
       Object.entries(layerExpansion).map(([layer, expansion]) => [
         layer,

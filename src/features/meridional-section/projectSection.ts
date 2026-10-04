@@ -27,6 +27,17 @@ export type SectionWindBelt = Readonly<{
   }>
 }>
 
+export type SectionLandSeaAnomaly = Readonly<{
+  sourceId: string
+  kind: 'high' | 'low'
+  latitude: number
+  longitude: number
+  anomalyStrength: number
+  name: string
+  source: string
+  coordinates: SectionCoordinates
+}>
+
 export type SectionCirculationCell = Readonly<
   Omit<CirculationCell, 'path'> & {
     sourceId: string
@@ -39,6 +50,7 @@ export type SectionProjection = Readonly<{
   circulationCells: readonly SectionCirculationCell[]
   pressureBelts: readonly SectionPressureBelt[]
   windBelts: readonly SectionWindBelt[]
+  landSeaAnomalies: readonly SectionLandSeaAnomaly[]
 }>
 
 const pressureBeltIds = [
@@ -104,6 +116,19 @@ export function projectSection(
         x1: sectionX(belt.southLatitude),
         x2: sectionX(belt.northLatitude),
         y: 330,
+      },
+    })),
+    landSeaAnomalies: snapshot.landSeaAnomalies.map((anomaly) => ({
+      sourceId: anomaly.id,
+      kind: anomaly.kind,
+      latitude: anomaly.latitude,
+      longitude: anomaly.longitude,
+      anomalyStrength: anomaly.anomalyStrength,
+      name: anomaly.name,
+      source: anomaly.source,
+      coordinates: {
+        x: sectionX(anomaly.latitude),
+        y: anomaly.kind === 'high' ? 190 : 230,
       },
     })),
   }

@@ -5,6 +5,7 @@ import { CausalPanel } from './features/causal-panel/CausalPanel'
 import { SimulationControls } from './features/control-panel/SimulationControls'
 import { GlobeView } from './features/globe/GlobeView'
 import { KeyframePanel } from './features/keyframes/KeyframePanel'
+import { LandSeaControls } from './features/land-sea/LandSeaControls'
 import { LocationPanel } from './features/location/LocationPanel'
 import { MapProjection } from './features/map-projection/MapProjection'
 import { MeridionalSection } from './features/meridional-section/MeridionalSection'
@@ -135,7 +136,8 @@ function App() {
           />
         }
         controls={
-          <SimulationControls
+          <>
+            <SimulationControls
             month={state.month}
             coriolisEnabled={state.coriolisEnabled}
             frictionStrength={state.frictionStrength}
@@ -145,8 +147,13 @@ function App() {
             onCoriolisChange={state.setCoriolisEnabled}
             onFrictionChange={state.setFrictionStrength}
             onExplodedViewChange={state.setExplodedViewProgress}
-            onLayerChange={state.setVisibleLayer}
-          />
+              onLayerChange={state.setVisibleLayer}
+            />
+            <LandSeaControls
+              landSeaContrast={state.landSeaContrast}
+              onChange={state.setLandSeaContrast}
+            />
+          </>
         }
         timeline={
           <MonthTimeline month={state.month} onMonthChange={state.setMonth} />

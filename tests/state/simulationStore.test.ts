@@ -159,6 +159,59 @@ describe('simulation store', () => {
     )
   })
 
+  it('updates the shared snapshot when land-sea contrast changes', () => {
+    const firstSnapshot = selectAtmosphereSnapshot(
+      useSimulationStore.getState(),
+    )
+
+    useSimulationStore.getState().setLandSeaContrast(1)
+    const secondSnapshot = selectAtmosphereSnapshot(
+      useSimulationStore.getState(),
+    )
+
+    expect(secondSnapshot).not.toBe(firstSnapshot)
+    expect(secondSnapshot.landSeaAnomalies).toHaveLength(3)
+  })
+
+  it('restores land-sea contrast through undo and redo', () => {
+    useSimulationStore.getState().setLandSeaContrast(1)
+    useSimulationStore.getState().undo()
+
+    expect(useSimulationStore.getState().landSeaContrast).toBe(0)
+
+    useSimulationStore.getState().redo()
+
+    expect(useSimulationStore.getState().landSeaContrast).toBe(1)
+  })
+
+  it('rejects invalid land-sea contrast values', () => {
+    expect(() =>
+      useSimulationStore.getState().setLandSeaContrast(-0.1),
+    ).toThrow(RangeError)
+    expect(() =>
+      useSimulationStore.getState().setLandSeaContrast(1.1),
+    ).toThrow(RangeError)
+  })
+
+  it('rejects presets with invalid land-sea contrast', () => {
+    expect(() =>
+      useSimulationStore.getState().applyPreset({
+        parameters: {
+          month: 7,
+          coriolisEnabled: true,
+          rotationDirection: 1,
+          rotationStrength: 1,
+          frictionStrength: 0,
+          seasonalShiftScale: 0.25,
+          landSeaContrast: 1.1,
+        },
+        selectedPressureBeltId: null,
+        keyframeId: null,
+        teachingStep: 0,
+      }),
+    ).toThrow(RangeError)
+  })
+
   it('rejects invalid action inputs', () => {
     expect(() => useSimulationStore.getState().setMonth(0)).toThrow(
       RangeError,

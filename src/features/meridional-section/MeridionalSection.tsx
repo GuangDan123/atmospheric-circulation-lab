@@ -1,6 +1,10 @@
 import type { KeyboardEvent } from 'react'
 import type { AtmosphereSnapshot } from '../../domain/atmosphere/deriveAtmosphere'
-import { projectSection, type SectionPressureBelt } from './projectSection'
+import {
+  projectSection,
+  type SectionLandSeaAnomaly,
+  type SectionPressureBelt,
+} from './projectSection'
 
 type MeridionalSectionProps = Readonly<{
   snapshot: AtmosphereSnapshot
@@ -50,6 +54,10 @@ function beltDescription(belt: SectionPressureBelt): string {
   const formation = belt.formation === 'dynamic' ? '动力成因' : '热力成因'
   const motion = belt.verticalMotion === 'rising' ? '上升气流' : '下沉气流'
   return `${formation}，${motion}`
+}
+
+function anomalyDescription(anomaly: SectionLandSeaAnomaly): string {
+  return `${anomaly.kind === 'high' ? '高压' : '低压'}，海陆差异异常强度 ${Math.round(anomaly.anomalyStrength * 100)}%`
 }
 
 export function MeridionalSection({
@@ -107,6 +115,22 @@ export function MeridionalSection({
           y2={belt.coordinates.y}
           stroke="currentColor"
         />
+      ))}
+      {projection.landSeaAnomalies.map((anomaly) => (
+        <g
+          key={anomaly.sourceId}
+          data-source-id={anomaly.sourceId}
+          aria-label={anomaly.name}
+          aria-description={`${anomalyDescription(anomaly)}，${anomaly.source}`}
+        >
+          <circle
+            cx={anomaly.coordinates.x}
+            cy={anomaly.coordinates.y}
+            r={5 + anomaly.anomalyStrength * 5}
+            fill={anomaly.kind === 'high' ? '#ef4444' : '#38bdf8'}
+            opacity={0.45 + anomaly.anomalyStrength * 0.55}
+          />
+        </g>
       ))}
       {projection.pressureBelts.map((belt) => (
         <g

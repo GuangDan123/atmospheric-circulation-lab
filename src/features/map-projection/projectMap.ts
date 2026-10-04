@@ -26,11 +26,26 @@ export type MapWindBelt = Readonly<{
   }>
 }>
 
+export type MapLandSeaAnomaly = Readonly<{
+  sourceId: string
+  kind: 'high' | 'low'
+  latitude: number
+  longitude: number
+  anomalyStrength: number
+  name: string
+  source: string
+  coordinates: Readonly<{
+    x: number
+    y: number
+  }>
+}>
+
 export type MapProjectionData = Readonly<{
   source: AtmosphereSnapshot
   centralLongitude: number
   pressureBelts: readonly MapPressureBelt[]
   windBelts: readonly MapWindBelt[]
+  landSeaAnomalies: readonly MapLandSeaAnomaly[]
 }>
 
 const pressureBeltIds = [
@@ -60,6 +75,11 @@ function adjacentWindBeltIds(index: number): readonly string[] {
   return [windBeltIds[index - 1], windBeltIds[index]].filter(
     (id): id is (typeof windBeltIds)[number] => id !== undefined,
   )
+}
+
+function mapX(longitude: number, centralLongitude: number): number {
+  const relativeLongitude = ((longitude - centralLongitude + 540) % 360) - 180
+  return 50 + ((relativeLongitude + 180) / 360) * 700
 }
 
 export function projectMap(
@@ -98,6 +118,19 @@ export function projectMap(
         y1: mapY(belt.southLatitude),
         y2: mapY(belt.northLatitude),
         width: 800,
+      },
+    })),
+    landSeaAnomalies: snapshot.landSeaAnomalies.map((anomaly) => ({
+      sourceId: anomaly.id,
+      kind: anomaly.kind,
+      latitude: anomaly.latitude,
+      longitude: anomaly.longitude,
+      anomalyStrength: anomaly.anomalyStrength,
+      name: anomaly.name,
+      source: anomaly.source,
+      coordinates: {
+        x: mapX(anomaly.longitude, centralLongitude),
+        y: mapY(anomaly.latitude),
       },
     })),
   }

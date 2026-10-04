@@ -50,6 +50,7 @@ export const initialSimulationState = {
   rotationStrength: 1,
   frictionStrength: 0,
   seasonalShiftScale: 0.25,
+  landSeaContrast: 0,
   selectedPressureBeltId: null,
   keyframeId: null,
   teachingStep: 0,
@@ -67,6 +68,7 @@ type SimulationValues = {
   rotationStrength: number
   frictionStrength: number
   seasonalShiftScale: number
+  landSeaContrast: number
   selectedPressureBeltId: string | null
   keyframeId: string | null
   teachingStep: number
@@ -83,6 +85,7 @@ type SimulationActions = {
   setCoriolisEnabled: (enabled: boolean) => void
   setRotationDirection: (direction: RotationDirection) => void
   setFrictionStrength: (strength: number) => void
+  setLandSeaContrast: (contrast: number) => void
   selectPressureBelt: (id: string | null) => void
   setExplodedViewProgress: (progress: number) => void
   setVisibleLayer: (layer: VisibleLayer, visible: boolean) => void
@@ -133,6 +136,7 @@ function toTeachingState(state: SimulationValues): TeachingState {
     rotationStrength: state.rotationStrength,
     frictionStrength: state.frictionStrength,
     seasonalShiftScale: state.seasonalShiftScale,
+    landSeaContrast: state.landSeaContrast,
     selectedPressureBeltId: state.selectedPressureBeltId,
     keyframeId: state.keyframeId,
     teachingStep: state.teachingStep,
@@ -149,6 +153,7 @@ function restoreTeachingState(
   | 'rotationStrength'
   | 'frictionStrength'
   | 'seasonalShiftScale'
+  | 'landSeaContrast'
   | 'selectedPressureBeltId'
   | 'keyframeId'
   | 'teachingStep'
@@ -192,6 +197,10 @@ export const useSimulationStore = create<SimulationStoreState>((set) => ({
   setFrictionStrength: (frictionStrength) => {
     assertFiniteInRange(frictionStrength, 'frictionStrength', 0, 1)
     set((state) => recordChange(state, { frictionStrength }))
+  },
+  setLandSeaContrast: (landSeaContrast) => {
+    assertFiniteInRange(landSeaContrast, 'landSeaContrast', 0, 1)
+    set((state) => recordChange(state, { landSeaContrast }))
   },
   selectPressureBelt: (selectedPressureBeltId) => {
     set((state) => recordChange(state, { selectedPressureBeltId }))
@@ -270,6 +279,12 @@ export const useSimulationStore = create<SimulationStoreState>((set) => ({
       0,
       1,
     )
+    assertFiniteInRange(
+      preset.parameters.landSeaContrast ?? 0,
+      'landSeaContrast',
+      0,
+      1,
+    )
     if (!Number.isInteger(preset.teachingStep) || preset.teachingStep < 0) {
       throw new RangeError('teachingStep must be a non-negative integer')
     }
@@ -328,7 +343,8 @@ function parametersEqual(
     first.rotationDirection === second.rotationDirection &&
     first.rotationStrength === second.rotationStrength &&
     first.frictionStrength === second.frictionStrength &&
-    first.seasonalShiftScale === second.seasonalShiftScale
+    first.seasonalShiftScale === second.seasonalShiftScale &&
+    (first.landSeaContrast ?? 0) === (second.landSeaContrast ?? 0)
   )
 }
 
@@ -342,6 +358,7 @@ export function selectAtmosphereSnapshot(
     rotationStrength: state.rotationStrength,
     frictionStrength: state.frictionStrength,
     seasonalShiftScale: state.seasonalShiftScale,
+    landSeaContrast: state.landSeaContrast,
   }
 
   if (
