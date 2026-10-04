@@ -6,7 +6,7 @@ export type WindBelt = Readonly<{
   name: string
   southLatitude: number
   northLatitude: number
-  eastward: boolean
+  eastward: boolean | null
   northward: boolean
 }>
 
@@ -24,9 +24,14 @@ function isHighPressure(belt: PressureBelt): boolean {
 
 function getWindName(
   index: number,
-  eastward: boolean,
+  eastward: boolean | null,
   northward: boolean,
 ): string {
+  if (eastward === null) {
+    return northward ? '南风' : '北风'
+  }
+
+  const zonalName = eastward ? '西风' : '东风'
   const directionalName = eastward
     ? northward
       ? '西南'
@@ -36,11 +41,11 @@ function getWindName(
       : '东北'
 
   if (index === 0 || index === 5) {
-    return `${directionalName}极地东风`
+    return `${directionalName}极地${zonalName}`
   }
 
   if (index === 1 || index === 4) {
-    return `${directionalName}盛行西风`
+    return `${directionalName}盛行${zonalName}`
   }
 
   return `${directionalName}信风`
@@ -61,9 +66,11 @@ export function getWindBelts(
       frictionStrength: input.frictionStrength,
       enabled: input.coriolisEnabled,
     })
-    const eastward = northward
-      ? coriolis.direction === 'right'
-      : coriolis.direction === 'left'
+    const eastward = coriolis.direction === 'none'
+      ? null
+      : northward
+        ? coriolis.direction === 'right'
+        : coriolis.direction === 'left'
 
     return {
       name: getWindName(index, eastward, northward),

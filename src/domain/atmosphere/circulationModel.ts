@@ -132,11 +132,12 @@ function createPath(
 }
 
 export function getCirculationCells(
-  { coriolisEnabled }: Pick<SimulationParameters, 'coriolisEnabled'> = {
+  { coriolisEnabled, rotationStrength = 1 }: Pick<SimulationParameters, 'coriolisEnabled'> &
+    Partial<Pick<SimulationParameters, 'rotationStrength'>> = {
     coriolisEnabled: true,
   },
 ): readonly CirculationCell[] {
-  const definitions = coriolisEnabled
+  const definitions = coriolisEnabled && rotationStrength !== 0
     ? CELL_DEFINITIONS
     : SINGLE_CELL_DEFINITIONS
 

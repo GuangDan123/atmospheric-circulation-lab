@@ -77,6 +77,7 @@ type SimulationValues = {
   performanceTier: PerformanceSelection
   playback: PlaybackStatus
   playbackSpeed: number
+  resetVersion: number
   history: History<TeachingState>
 }
 
@@ -84,6 +85,7 @@ type SimulationActions = {
   setMonth: (month: number) => void
   setCoriolisEnabled: (enabled: boolean) => void
   setRotationDirection: (direction: RotationDirection) => void
+  setRotationStrength: (strength: number) => void
   setFrictionStrength: (strength: number) => void
   setLandSeaContrast: (contrast: number) => void
   selectPressureBelt: (id: string | null) => void
@@ -165,6 +167,9 @@ function recordChange(
   state: SimulationStoreState,
   change: Partial<TeachingState>,
 ): Partial<SimulationValues> {
+  if ((Object.keys(change) as (keyof TeachingState)[]).every(
+    (key) => state[key] === change[key],
+  )) return {}
   return {
     ...change,
     history: pushHistory(state.history, toTeachingState(state)),
@@ -182,6 +187,7 @@ function toPlaybackState(state: SimulationValues): CausalPlaybackState {
 
 export const useSimulationStore = create<SimulationStoreState>((set) => ({
   ...initialSimulationState,
+  resetVersion: 0,
   history: createHistory<TeachingState>(),
   setMonth: (month) => {
     assertMonth(month)
@@ -193,6 +199,10 @@ export const useSimulationStore = create<SimulationStoreState>((set) => ({
   setRotationDirection: (rotationDirection) => {
     assertRotationDirection(rotationDirection)
     set((state) => recordChange(state, { rotationDirection }))
+  },
+  setRotationStrength: (rotationStrength) => {
+    assertFiniteInRange(rotationStrength, 'rotationStrength', 0, 1)
+    set((state) => recordChange(state, { rotationStrength }))
   },
   setFrictionStrength: (frictionStrength) => {
     assertFiniteInRange(frictionStrength, 'frictionStrength', 0, 1)
@@ -322,11 +332,12 @@ export const useSimulationStore = create<SimulationStoreState>((set) => ({
     })
   },
   reset: () => {
-    set({
+    set((state) => ({
       ...initialSimulationState,
       visibleLayers: { ...defaultVisibleLayers },
+      resetVersion: state.resetVersion + 1,
       history: createHistory<TeachingState>(),
-    })
+    }))
   },
 }))
 

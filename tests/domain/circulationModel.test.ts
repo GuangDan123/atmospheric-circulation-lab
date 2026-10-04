@@ -21,6 +21,15 @@ describe('getCirculationCells', () => {
     )
   })
 
+  it('uses the no-Coriolis circulation when rotation strength is zero', () => {
+    expect(getCirculationCells({ coriolisEnabled: true, rotationStrength: 0 })).toEqual(
+      getCirculationCells({ coriolisEnabled: false }),
+    )
+    expect(getCirculationCells({ coriolisEnabled: true, rotationStrength: 0.01 })).toEqual(
+      getCirculationCells(),
+    )
+  })
+
   it('preserves the default model when Coriolis is enabled', () => {
     expect(getCirculationCells({ coriolisEnabled: true })).toEqual(
       getCirculationCells(),

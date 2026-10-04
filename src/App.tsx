@@ -9,6 +9,7 @@ import { LandSeaControls } from './features/land-sea/LandSeaControls'
 import { LocationPanel } from './features/location/LocationPanel'
 import { MapProjection } from './features/map-projection/MapProjection'
 import { MeridionalSection } from './features/meridional-section/MeridionalSection'
+import { PredictionCard } from './features/student/PredictionCard'
 import { PerformancePanel } from './features/settings/PerformancePanel'
 import {
   TeacherToolbar,
@@ -138,16 +139,30 @@ function App() {
         controls={
           <>
             <SimulationControls
-            month={state.month}
-            coriolisEnabled={state.coriolisEnabled}
-            frictionStrength={state.frictionStrength}
-            explodedViewProgress={state.explodedViewProgress}
-            visibleLayers={state.visibleLayers}
-            onMonthChange={state.setMonth}
-            onCoriolisChange={state.setCoriolisEnabled}
-            onFrictionChange={state.setFrictionStrength}
-            onExplodedViewChange={state.setExplodedViewProgress}
+              month={state.month}
+              coriolisEnabled={state.coriolisEnabled}
+              rotationDirection={state.rotationDirection}
+              rotationStrength={state.rotationStrength}
+              canUndo={state.history.past.length > 0}
+              canRedo={state.history.future.length > 0}
+              onUndo={state.undo}
+              onRedo={state.redo}
+              onRotationDirectionChange={state.setRotationDirection}
+              onRotationStrengthChange={state.setRotationStrength}
+              frictionStrength={state.frictionStrength}
+              explodedViewProgress={state.explodedViewProgress}
+              visibleLayers={state.visibleLayers}
+              onMonthChange={state.setMonth}
+              onCoriolisChange={state.setCoriolisEnabled}
+              onFrictionChange={state.setFrictionStrength}
+              onExplodedViewChange={state.setExplodedViewProgress}
               onLayerChange={state.setVisibleLayer}
+            />
+            <PredictionCard
+              key={state.resetVersion}
+              snapshot={snapshot}
+              onApplyPreset={state.applyPreset}
+              onPause={() => state.setPlayback('paused')}
             />
             <LandSeaControls
               landSeaContrast={state.landSeaContrast}

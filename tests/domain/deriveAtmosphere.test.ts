@@ -33,6 +33,16 @@ describe('deriveAtmosphere', () => {
     expect(deriveAtmosphere(createParameters())).toEqual(enabled)
   })
 
+  it.each([1, -1] as const)('matches disabled Coriolis at zero rotation in direction %s', (rotationDirection) => {
+    const zero = deriveAtmosphere(createParameters({ rotationDirection, rotationStrength: 0 }))
+    const disabled = deriveAtmosphere(createParameters({ rotationDirection, coriolisEnabled: false }))
+
+    expect(zero.circulationCells).toEqual(disabled.circulationCells)
+    expect(zero.windBelts).toEqual(disabled.windBelts)
+    expect(zero.parameters.rotationStrength).toBe(0)
+    expect(zero.parameters.coriolisEnabled).toBe(true)
+  })
+
   it('does not share single-cell path points across snapshots', () => {
     const parameters = createParameters({ coriolisEnabled: false })
     const first = deriveAtmosphere(parameters)

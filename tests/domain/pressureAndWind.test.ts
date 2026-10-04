@@ -102,6 +102,47 @@ describe('getWindBelts', () => {
     expect(winds).toHaveLength(pressureBelts.length - 1)
   })
 
+  it('reverses zonal wind names together with motion under reverse rotation', () => {
+    const winds = getWindBelts({
+      pressureBelts: getPressureBelts({ month: 3, seasonalShiftScale: 0.25 }),
+      coriolisEnabled: true,
+      rotationDirection: -1,
+      rotationStrength: 1,
+      frictionStrength: 0,
+    })
+
+    expect(winds.map(({ name }) => name)).toEqual([
+      '西南极地西风', '东北盛行东风', '西南信风',
+      '西北信风', '东南盛行东风', '西北极地西风',
+    ])
+    for (const wind of winds) {
+      expect(wind.name.startsWith(wind.eastward ? '西' : '东')).toBe(true)
+      expect(wind.name[1]).toBe(wind.northward ? '南' : '北')
+    }
+  })
+
+  it.each([
+    { coriolisEnabled: false, rotationStrength: 1, frictionStrength: 0 },
+    { coriolisEnabled: true, rotationStrength: 0, frictionStrength: 0 },
+    { coriolisEnabled: true, rotationStrength: 1, frictionStrength: 1 },
+  ])('names undeflected winds by their meridional source %#', (input) => {
+    for (const rotationDirection of [1, -1] as const) {
+      const winds = getWindBelts({
+        pressureBelts: getPressureBelts({ month: 3, seasonalShiftScale: 0.25 }),
+        rotationDirection,
+        ...input,
+      })
+
+      expect(winds.map(({ name }) => name)).toEqual([
+        '南风', '北风', '南风', '北风', '南风', '北风',
+      ])
+      for (const wind of winds) {
+        expect(wind.eastward).toBeNull()
+        expect(wind.name).toBe(wind.northward ? '南风' : '北风')
+      }
+    }
+  })
+
   it('uses the current adjacent belt boundaries', () => {
     const pressureBelts = getPressureBelts({
       month: 6,

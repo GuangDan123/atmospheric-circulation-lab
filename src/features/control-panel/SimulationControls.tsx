@@ -1,9 +1,18 @@
 import type { ChangeEvent } from 'react'
+import type { RotationDirection } from '../../domain/atmosphere/types'
 import type { VisibleLayer } from '../../state/types'
 
 type SimulationControlsProps = Readonly<{
   month: number
   coriolisEnabled: boolean
+  rotationDirection: RotationDirection
+  rotationStrength: number
+  canUndo: boolean
+  canRedo: boolean
+  onUndo: () => void
+  onRedo: () => void
+  onRotationDirectionChange: (direction: RotationDirection) => void
+  onRotationStrengthChange: (strength: number) => void
   frictionStrength: number
   explodedViewProgress: number
   visibleLayers: Readonly<Record<VisibleLayer, boolean>>
@@ -26,6 +35,14 @@ const layerLabels: Readonly<Record<VisibleLayer, string>> = {
 export function SimulationControls({
   month,
   coriolisEnabled,
+  rotationDirection,
+  rotationStrength,
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
+  onRotationDirectionChange,
+  onRotationStrengthChange,
   frictionStrength,
   explodedViewProgress,
   visibleLayers,
@@ -44,6 +61,25 @@ export function SimulationControls({
   return (
     <section aria-label="模拟控制面板" className="panel">
       <h2>模拟控制</h2>
+      <div className="causal-panel__actions">
+        <button type="button" disabled={!canUndo} onClick={onUndo}>撤销</button>
+        <button type="button" disabled={!canRedo} onClick={onRedo}>重做</button>
+      </div>
+      <p>撤销/重做恢复教学操作；因果链上一步/下一步用于讲解步进。</p>
+      <label>
+        自转方向
+        <select aria-label="自转方向" value={rotationDirection}
+          onChange={(event) => onRotationDirectionChange(Number(event.target.value) as RotationDirection)}>
+          <option value="1">正常自转（自西向东）</option>
+          <option value="-1">反向自转（自东向西）</option>
+        </select>
+      </label>
+      <label>
+        自转相对强度
+        <input aria-label="自转相对强度" type="range" min="0" max="1" step="0.05"
+          value={rotationStrength} onChange={handleNumber(onRotationStrengthChange)} />
+        <output>{rotationStrength.toFixed(2)}（教学相对量，0 表示无自转偏转）</output>
+      </label>
       <label>
         月份
         <input
