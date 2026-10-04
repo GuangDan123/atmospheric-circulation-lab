@@ -70,7 +70,7 @@ for (const scene of scenes) {
       await expect(page.locator('[data-source-id^="pressure-center:"]')).toHaveCount(0)
     }
 
-    await expect(page.getByText(`${Number(scene.contrast) * 100}%`)).toBeVisible()
+    await expect(page.getByRole('region', { name: '海陆差异控制面板' }).getByText(`${Number(scene.contrast) * 100}%`, { exact: true })).toBeVisible()
     await page.evaluate(async () => {
       await document.fonts.ready
       await new Promise<void>((resolve) =>

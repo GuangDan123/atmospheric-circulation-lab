@@ -10,6 +10,7 @@ import { PressureBeltLayer } from './layers/PressureBeltLayer'
 import { SurfaceLayer } from './layers/SurfaceLayer'
 import { VerticalMotionLayer } from './layers/VerticalMotionLayer'
 import { WindLayer } from './layers/WindLayer'
+import { MonsoonLayer } from './layers/MonsoonLayer'
 import type { GlobeProjection } from './projectGlobe'
 
 type GlobeSceneProps = Readonly<{
@@ -52,6 +53,7 @@ export function GlobeScene({
       {visibleLayers.pressure && projection.landSeaAnomalies.length > 0 && (
         <LandSeaAnomalyLayer
           anomalies={projection.landSeaAnomalies}
+          field={projection.landSeaField}
           transform={projection.layerTransforms.pressure}
         />
       )}
@@ -61,6 +63,9 @@ export function GlobeScene({
           transform={projection.layerTransforms.wind}
           rendering={windRendering}
         />
+      )}
+      {visibleLayers.wind && (projection.source.parameters.landSeaContrast ?? 0) > 0 && (
+        <MonsoonLayer monsoons={projection.monsoons} transform={projection.layerTransforms.wind} />
       )}
       {visibleLayers['vertical-motion'] && (
         <VerticalMotionLayer

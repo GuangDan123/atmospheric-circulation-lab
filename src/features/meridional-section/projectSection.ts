@@ -1,3 +1,4 @@
+import { getLandSeaField, type LandSeaFieldPoint } from '../../domain/atmosphere/landSeaModel'
 import type { CirculationCell } from '../../domain/atmosphere/circulationModel'
 import type { AtmosphereSnapshot } from '../../domain/atmosphere/deriveAtmosphere'
 import type { FormationType, VerticalMotion } from '../../domain/atmosphere/types'
@@ -33,6 +34,7 @@ export type SectionLandSeaAnomaly = Readonly<{
   latitude: number
   longitude: number
   anomalyStrength: number
+  evidence: readonly string[]
   name: string
   source: string
   coordinates: SectionCoordinates
@@ -46,6 +48,8 @@ export type SectionCirculationCell = Readonly<
 >
 
 export type SectionProjection = Readonly<{
+  landSeaField: readonly LandSeaFieldPoint[]
+  monsoons: AtmosphereSnapshot['monsoons']
   source: AtmosphereSnapshot
   circulationCells: readonly SectionCirculationCell[]
   pressureBelts: readonly SectionPressureBelt[]
@@ -87,6 +91,8 @@ export function projectSection(
 ): SectionProjection {
   return {
     source: snapshot,
+    monsoons: snapshot.monsoons,
+    landSeaField: getLandSeaField(snapshot.landSeaAnomalies),
     circulationCells: snapshot.circulationCells.map((cell) => ({
       sourceId: `circulation-cell:${cell.name}-${cell.hemisphere}`,
       name: cell.name,
@@ -124,6 +130,7 @@ export function projectSection(
       latitude: anomaly.latitude,
       longitude: anomaly.longitude,
       anomalyStrength: anomaly.anomalyStrength,
+      evidence: anomaly.evidence,
       name: anomaly.name,
       source: anomaly.source,
       coordinates: {

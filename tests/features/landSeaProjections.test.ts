@@ -51,3 +51,15 @@ describe('land-sea anomaly projections', () => {
     })
   })
 })
+
+it('projects the same sampled smooth field and evidence in all three views', () => {
+  const snapshot = createSnapshot()
+  const views = [projectGlobe(snapshot, 0), projectMap(snapshot, 0), projectSection(snapshot)]
+  for (const view of views) {
+    expect(view.landSeaField.length).toBeGreaterThan(100)
+    expect(view.landSeaField.map(({ value }) => value)).toEqual(views[0].landSeaField.map(({ value }) => value))
+    expect(view.landSeaAnomalies[0].evidence).toEqual(snapshot.landSeaAnomalies[0].evidence)
+  }
+  const ideal = { ...snapshot, landSeaAnomalies: [] }
+  expect(projectMap(ideal, 0).landSeaField).toEqual([])
+})

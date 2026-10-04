@@ -1,3 +1,4 @@
+import { MonsoonExplorer } from './features/monsoon/MonsoonExplorer'
 import { useMemo, useState } from 'react'
 import { ClassroomLayout } from './components/layout/ClassroomLayout'
 import { mediterraneanLocation } from './data/locations'
@@ -163,6 +164,14 @@ function App() {
               snapshot={snapshot}
               onApplyPreset={state.applyPreset}
               onPause={() => state.setPlayback('paused')}
+            />
+            <MonsoonExplorer
+              snapshot={snapshot}
+              onApplyPreset={state.applyPreset}
+              onSeasonalShiftChange={state.setSeasonalShiftScale}
+              onCrossEquatorialChange={state.setCrossEquatorialEnabled}
+              onCoriolisChange={state.setCoriolisEnabled}
+              onLandSeaChange={state.setLandSeaContrast}
             />
             <LandSeaControls
               landSeaContrast={state.landSeaContrast}

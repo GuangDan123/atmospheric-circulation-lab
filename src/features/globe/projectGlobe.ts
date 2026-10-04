@@ -1,3 +1,4 @@
+import { getLandSeaField, type LandSeaFieldPoint } from '../../domain/atmosphere/landSeaModel'
 import type { AtmosphereSnapshot } from '../../domain/atmosphere/deriveAtmosphere'
 import type { FormationType, VerticalMotion } from '../../domain/atmosphere/types'
 import type { VisibleLayer } from '../../state/types'
@@ -30,6 +31,7 @@ export type GlobeLandSeaAnomaly = Readonly<{
   latitude: number
   longitude: number
   anomalyStrength: number
+  evidence: readonly string[]
   name: string
   source: string
   coordinates: Readonly<{
@@ -44,6 +46,8 @@ export type GlobeLayerTransform = Readonly<{
 }>
 
 export type GlobeProjection = Readonly<{
+  landSeaField: readonly LandSeaFieldPoint[]
+  monsoons: AtmosphereSnapshot['monsoons']
   source: AtmosphereSnapshot
   pressureBelts: readonly GlobePressureBelt[]
   windBelts: readonly GlobeWindBelt[]
@@ -123,6 +127,8 @@ export function projectGlobe(
 
   return {
     source: snapshot,
+    monsoons: snapshot.monsoons,
+    landSeaField: getLandSeaField(snapshot.landSeaAnomalies),
     pressureBelts: snapshot.pressureBelts.map((belt, index) => ({
       sourceId: pressureBeltIds[index],
       formation: belt.formation,
@@ -146,6 +152,7 @@ export function projectGlobe(
       latitude: anomaly.latitude,
       longitude: anomaly.longitude,
       anomalyStrength: anomaly.anomalyStrength,
+      evidence: anomaly.evidence,
       name: anomaly.name,
       source: anomaly.source,
       coordinates: sphericalPoint(anomaly.latitude, anomaly.longitude, 0.06),

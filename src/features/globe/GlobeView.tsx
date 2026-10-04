@@ -1,3 +1,4 @@
+import { monsoonLabel } from '../monsoon/monsoonLabels'
 import { Canvas } from '@react-three/fiber'
 import type { AtmosphereSnapshot } from '../../domain/atmosphere/deriveAtmosphere'
 import type {
@@ -68,6 +69,9 @@ export function GlobeView({
 
   return (
     <section aria-label="三维全球大气环流球面视图">
+      {(snapshot.parameters.landSeaContrast ?? 0) > 0 && <div aria-label="季风投影">
+        {projection.monsoons.map((result) => <p key={result.region} data-source-id={`monsoon:${result.region}`} data-direction={result.direction}>{monsoonLabel(result)}</p>)}
+      </div>}
       <Canvas
         dpr={performanceProfile?.pixelRatio}
         camera={{ position: [0, 0.4, 3.25], fov: 48 }}

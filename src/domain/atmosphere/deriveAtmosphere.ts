@@ -1,3 +1,4 @@
+import { getMonsoon, type MonsoonResult } from './monsoonModel'
 import {
   getCirculationCells,
   getVerticalMotions,
@@ -24,6 +25,7 @@ export type AtmosphereSnapshot = Readonly<{
   pressureBelts: readonly PressureBelt[]
   windBelts: readonly WindBelt[]
   verticalMotions: readonly VerticalMotionMarker[]
+  monsoons: readonly MonsoonResult[]
   landSeaAnomalies: readonly LandSeaAnomaly[]
 }>
 
@@ -54,5 +56,9 @@ export function deriveAtmosphere(
     }),
     verticalMotions: getVerticalMotions(),
     landSeaAnomalies,
+    monsoons: (['east-asia', 'south-asia'] as const).map((region) => getMonsoon({
+      ...parameters, region, landSeaContrast,
+      crossEquatorialEnabled: parameters.crossEquatorialEnabled ?? true, terrainInfluence: false,
+    })),
   }
 }

@@ -29,6 +29,7 @@ export type TeachingState = Readonly<{
   rotationStrength: number
   frictionStrength: number
   seasonalShiftScale: number
+  crossEquatorialEnabled: boolean
   landSeaContrast: number
   selectedPressureBeltId: string | null
   keyframeId: string | null

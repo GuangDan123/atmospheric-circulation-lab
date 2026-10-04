@@ -51,6 +51,7 @@ export const initialSimulationState = {
   frictionStrength: 0,
   seasonalShiftScale: 0.25,
   landSeaContrast: 0,
+  crossEquatorialEnabled: true,
   selectedPressureBeltId: null,
   keyframeId: null,
   teachingStep: 0,
@@ -68,6 +69,7 @@ type SimulationValues = {
   rotationStrength: number
   frictionStrength: number
   seasonalShiftScale: number
+  crossEquatorialEnabled: boolean
   landSeaContrast: number
   selectedPressureBeltId: string | null
   keyframeId: string | null
@@ -87,6 +89,8 @@ type SimulationActions = {
   setRotationDirection: (direction: RotationDirection) => void
   setRotationStrength: (strength: number) => void
   setFrictionStrength: (strength: number) => void
+  setSeasonalShiftScale: (scale: number) => void
+  setCrossEquatorialEnabled: (enabled: boolean) => void
   setLandSeaContrast: (contrast: number) => void
   selectPressureBelt: (id: string | null) => void
   setExplodedViewProgress: (progress: number) => void
@@ -139,6 +143,7 @@ function toTeachingState(state: SimulationValues): TeachingState {
     frictionStrength: state.frictionStrength,
     seasonalShiftScale: state.seasonalShiftScale,
     landSeaContrast: state.landSeaContrast,
+    crossEquatorialEnabled: state.crossEquatorialEnabled,
     selectedPressureBeltId: state.selectedPressureBeltId,
     keyframeId: state.keyframeId,
     teachingStep: state.teachingStep,
@@ -156,6 +161,7 @@ function restoreTeachingState(
   | 'frictionStrength'
   | 'seasonalShiftScale'
   | 'landSeaContrast'
+  | 'crossEquatorialEnabled'
   | 'selectedPressureBeltId'
   | 'keyframeId'
   | 'teachingStep'
@@ -207,6 +213,13 @@ export const useSimulationStore = create<SimulationStoreState>((set) => ({
   setFrictionStrength: (frictionStrength) => {
     assertFiniteInRange(frictionStrength, 'frictionStrength', 0, 1)
     set((state) => recordChange(state, { frictionStrength }))
+  },
+  setSeasonalShiftScale: (seasonalShiftScale) => {
+    assertFiniteInRange(seasonalShiftScale, 'seasonalShiftScale', 0, 1)
+    set((state) => recordChange(state, { seasonalShiftScale }))
+  },
+  setCrossEquatorialEnabled: (crossEquatorialEnabled) => {
+    set((state) => recordChange(state, { crossEquatorialEnabled }))
   },
   setLandSeaContrast: (landSeaContrast) => {
     assertFiniteInRange(landSeaContrast, 'landSeaContrast', 0, 1)
@@ -301,6 +314,8 @@ export const useSimulationStore = create<SimulationStoreState>((set) => ({
     set((state) =>
       recordChange(state, {
         ...preset.parameters,
+        landSeaContrast: preset.parameters.landSeaContrast ?? 0,
+        crossEquatorialEnabled: preset.parameters.crossEquatorialEnabled ?? true,
         selectedPressureBeltId: preset.selectedPressureBeltId,
         keyframeId: preset.keyframeId,
         teachingStep: preset.teachingStep,
@@ -349,6 +364,7 @@ function parametersEqual(
   second: SimulationParameters,
 ): boolean {
   return (
+    (first.crossEquatorialEnabled ?? true) === (second.crossEquatorialEnabled ?? true) &&
     first.month === second.month &&
     first.coriolisEnabled === second.coriolisEnabled &&
     first.rotationDirection === second.rotationDirection &&
@@ -370,6 +386,7 @@ export function selectAtmosphereSnapshot(
     frictionStrength: state.frictionStrength,
     seasonalShiftScale: state.seasonalShiftScale,
     landSeaContrast: state.landSeaContrast,
+    crossEquatorialEnabled: state.crossEquatorialEnabled,
   }
 
   if (

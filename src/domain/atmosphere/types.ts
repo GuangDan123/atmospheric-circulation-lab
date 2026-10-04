@@ -15,5 +15,6 @@ export type SimulationParameters = Readonly<{
   rotationStrength: number
   frictionStrength: number
   seasonalShiftScale: number
+  crossEquatorialEnabled?: boolean
   landSeaContrast?: number
 }>

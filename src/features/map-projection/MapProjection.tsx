@@ -1,3 +1,4 @@
+import { monsoonLabel } from '../monsoon/monsoonLabels'
 import type { KeyboardEvent } from 'react'
 import type { AtmosphereSnapshot } from '../../domain/atmosphere/deriveAtmosphere'
 import {
@@ -88,6 +89,9 @@ export function MapProjection({
       <text x={400} y={410} textAnchor="middle">
         {longitudeLabel(projection.centralLongitude)}
       </text>
+      {(snapshot.parameters.landSeaContrast ?? 0) > 0 && <g aria-label="季风投影">
+        {projection.monsoons.map((result, index) => <text key={result.region} x={400} y={25 + index * 18} textAnchor="middle" data-source-id={`monsoon:${result.region}`} data-direction={result.direction}>{monsoonLabel(result)}</text>)}
+      </g>}
       {latitudeLabels.map(({ latitude, label }) => {
         const y = yForLatitude(latitude)
         return (
@@ -98,6 +102,26 @@ export function MapProjection({
             </text>
           </g>
         )
+      })}
+      {projection.landSeaField.length > 0 && (
+        <g aria-label="海陆异常平滑衰减场" pointerEvents="none">
+          {projection.landSeaField.map((point, index) => {
+            const longitude = ((point.longitude - centralLongitude + 540) % 360) - 180
+            return <rect key={index} x={50 + (longitude + 175) / 360 * 700} y={yForLatitude(point.latitude + 5)} width={700 / 36} height={20} fill={point.value > 0 ? '#ef4444' : '#38bdf8'} opacity={Math.min(0.5, Math.abs(point.value) * 0.5)} />
+          })}
+        </g>
+      )}
+      {(snapshot.parameters.landSeaContrast ?? 0) > 0 && projection.monsoons.filter((result) => result.relativeStrength > 0).map((result) => {
+        const eastward = result.direction === 'southwest' || result.direction === 'northwest'
+        const northward = result.direction === 'southwest' || result.direction === 'southeast'
+        const x = result.region === 'east-asia' ? 50 + (((120 - centralLongitude + 540) % 360)) / 360 * 700 : 50 + (((80 - centralLongitude + 540) % 360)) / 360 * 700
+        const y = yForLatitude(result.region === 'east-asia' ? 30 : 20)
+        const dx = (eastward ? 1 : -1) * 28
+        const dy = (northward ? -1 : 1) * 28
+        return <g key={result.region} data-monsoon-arrow={result.region} aria-label={`${monsoonLabel(result)}；箭头为气流去向`} stroke="#facc15" strokeWidth={3} fill="none">
+          <line x1={x} y1={y} x2={x + dx} y2={y + dy} />
+          <path d={`M ${x + dx - dx * 0.3 + dy * 0.2} ${y + dy - dy * 0.3 - dx * 0.2} L ${x + dx} ${y + dy} L ${x + dx - dx * 0.3 - dy * 0.2} ${y + dy - dy * 0.3 + dx * 0.2}`} />
+        </g>
       })}
       {projection.windBelts.map((belt) => (
         <rect
@@ -116,7 +140,7 @@ export function MapProjection({
           key={anomaly.sourceId}
           data-source-id={anomaly.sourceId}
           aria-label={anomaly.name}
-          aria-description={`${anomalyDescription(anomaly)}，${anomaly.source}`}
+          aria-description={`${anomalyDescription(anomaly)}，${anomaly.source}，${anomaly.evidence.join("；")}`}
         >
           <circle
             cx={anomaly.coordinates.x}
